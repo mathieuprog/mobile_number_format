@@ -49,6 +49,16 @@ defmodule MobileNumberFormatTest do
     assert :insufficient_data == MobileNumberFormat.parse(%{national_number: "0455123456"})
   end
 
+  test "country not using national prefix" do
+    assert :invalid_number == MobileNumberFormat.parse(%{international_number: "+25311"})
+    assert :invalid_number == MobileNumberFormat.parse(%{national_number: "11", country_calling_code: "+253"})
+
+    assert {:ok, %{iso_country_code: "DJ", country_calling_code: "253", national_number: "77831001"}} =
+      MobileNumberFormat.parse(%{international_number: "+25377831001"})
+    assert {:ok, %{iso_country_code: "DJ", country_calling_code: "253", national_number: "77831001"}} =
+      MobileNumberFormat.parse(%{national_number: "77831001", country_calling_code: "+253"})
+  end
+
   test "valid_number?/1" do
     assert MobileNumberFormat.valid_number?(%{iso_country_code: "MP", country_calling_code: "1", national_number: "6702345678"})
     refute MobileNumberFormat.valid_number?(%{iso_country_code: "MP", country_calling_code: "1", national_number: "0006702345678"})

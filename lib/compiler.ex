@@ -91,28 +91,30 @@ defmodule MobileNumberFormat.Compiler do
                 trimmed_national_number_input: trimmed_national_number_input
               }}
             else
-              cleaned_national_number_without_prefix = cleaned_national_number |> String.replace_prefix(national_prefix, "")
+              if national_prefix do
+                cleaned_national_number_without_prefix = cleaned_national_number |> String.replace_prefix(national_prefix, "")
 
-              if(
-                cleaned_national_number != cleaned_national_number_without_prefix
-                && match_national_number?(formatting_rules, cleaned_national_number_without_prefix)
-              ) do
-                national_number_without_prefix_arg =
-                  national_prefix
-                  |> String.graphemes()
-                  |> Enum.reduce(national_number_arg, fn digit, national_number_arg ->
-                    String.replace(national_number_arg, digit, "", global: false)
-                  end)
+                if(
+                  cleaned_national_number != cleaned_national_number_without_prefix
+                  && match_national_number?(formatting_rules, cleaned_national_number_without_prefix)
+                ) do
+                  national_number_without_prefix_arg =
+                    national_prefix
+                    |> String.graphemes()
+                    |> Enum.reduce(national_number_arg, fn digit, national_number_arg ->
+                      String.replace(national_number_arg, digit, "", global: false)
+                    end)
 
-                %{"trimmed_national_number_input" => trimmed_national_number_input} =
-                  Regex.named_captures(~r/(?<trimmed_national_number_input>\d.*\d)/, national_number_without_prefix_arg)
+                  %{"trimmed_national_number_input" => trimmed_national_number_input} =
+                    Regex.named_captures(~r/(?<trimmed_national_number_input>\d.*\d)/, national_number_without_prefix_arg)
 
-                {:ok, %{
-                  iso_country_code: iso_country_code,
-                  country_calling_code: country_calling_code,
-                  national_number: cleaned_national_number_without_prefix,
-                  trimmed_national_number_input: trimmed_national_number_input
-                }}
+                  {:ok, %{
+                    iso_country_code: iso_country_code,
+                    country_calling_code: country_calling_code,
+                    national_number: cleaned_national_number_without_prefix,
+                    trimmed_national_number_input: trimmed_national_number_input
+                  }}
+                end
               end
             end
           end)
@@ -150,16 +152,20 @@ defmodule MobileNumberFormat.Compiler do
                 String.replace(international_number_arg, digit, "", global: false)
               end)
 
-            case Regex.named_captures(~r/(?<national_prefix>\d+?)\s*\)(?<national_number>.*)$/, national_number_arg) do
-              nil ->
-                %{national_number_arg: national_number_arg}
+            if national_prefix do
+              case Regex.named_captures(~r/(?<national_prefix>\d+?)\s*\)(?<national_number>.*)$/, national_number_arg) do
+                nil ->
+                  %{national_number_arg: national_number_arg}
 
-              %{"national_number" => matched_national_number, "national_prefix" => matched_national_prefix} ->
-                matched_national_prefix = matched_national_prefix |> String.replace(~r/[^\d]/, "")
+                %{"national_number" => matched_national_number, "national_prefix" => matched_national_prefix} ->
+                  matched_national_prefix = matched_national_prefix |> String.replace(~r/[^\d]/, "")
 
-                if national_prefix == matched_national_prefix do
-                  %{national_number_arg: matched_national_number}
-                end
+                  if national_prefix == matched_national_prefix do
+                    %{national_number_arg: matched_national_number}
+                  end
+              end
+            else
+              %{national_number_arg: national_number_arg}
             end
             |> case do
               %{national_number_arg: national_number_arg} ->
