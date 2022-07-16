@@ -2,7 +2,7 @@
 
 This library helps you parsing and validating mobile phone numbers.
 
-It relies on the data available in Google's [libphonenumber](https://github.com/google/libphonenumber) library. Version `0.2.0` uses the data from version `v8.12.51` of `libphonenumber`.
+It relies on the data available in Google's [libphonenumber](https://github.com/google/libphonenumber) library. Version `0.3.0` uses the data from version `v8.12.51` of `libphonenumber`.
 
 ### `parse/1`
 
@@ -163,7 +163,7 @@ Add `mobile_number_format` for Elixir as a dependency in your `mix.exs` file:
 ```elixir
 def deps do
   [
-    {:mobile_number_format, "~> 0.2.0"}
+    {:mobile_number_format, "~> 0.3.0"}
   ]
 end
 ```
