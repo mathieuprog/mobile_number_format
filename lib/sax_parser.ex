@@ -12,7 +12,7 @@ defmodule MobileNumberFormat.SaxParser do
   def handle_event(:start_element, {"territory", attributes}, {[], territories}) do
     territory =
       %{
-        iso_country_code: Enum.find_value(attributes, fn {k, v} -> k == "id" && v end),
+        country_code: Enum.find_value(attributes, fn {k, v} -> k == "id" && v end),
         country_calling_code: Enum.find_value(attributes, fn {k, v} -> k == "countryCode" && v end) |> String.to_integer() |> to_string(),
         national_prefix: Enum.find_value(attributes, fn {k, v} -> k == "nationalPrefix" && v |> String.to_integer() |> to_string() end),
         possible_lengths: nil,

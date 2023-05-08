@@ -32,19 +32,19 @@ defmodule MobileNumberFormat.Compiler do
           fetch_by_country_calling_code(country_calling_code) != :error
         end
 
-        def valid_iso_country_code?(iso_country_code) do
-          fetch_by_iso_country_code(iso_country_code) != :error
+        def valid_country_code?(country_code) do
+          fetch_by_country_code(country_code) != :error
         end
 
         def parse(%{} = data) do
           international_number_arg = Map.get(data, :international_number, nil)
           national_number_arg = Map.get(data, :national_number, nil)
           country_calling_code_arg = Map.get(data, :country_calling_code, nil)
-          iso_country_code_arg = Map.get(data, :iso_country_code, nil)
+          country_code_arg = Map.get(data, :country_code, nil)
 
           cond do
-            iso_country_code_arg || country_calling_code_arg ->
-              fetch_by_iso_country_code_or_country_calling_code(iso_country_code_arg, country_calling_code_arg)
+            country_code_arg || country_calling_code_arg ->
+              fetch_by_country_code_or_country_calling_code(country_code_arg, country_calling_code_arg)
               |> case do
                 {:ok, formatting_rules} ->
                   formatting_rules_list = List.wrap(formatting_rules)
@@ -76,7 +76,7 @@ defmodule MobileNumberFormat.Compiler do
           Enum.find_value(formatting_rules_list, fn formatting_rules ->
             %{
               country_calling_code: country_calling_code,
-              iso_country_code: iso_country_code,
+              country_code: country_code,
               national_prefix: national_prefix
             } = formatting_rules
 
@@ -85,7 +85,7 @@ defmodule MobileNumberFormat.Compiler do
                 Regex.named_captures(~r/(?<trimmed_national_number_input>\d.*\d)/, national_number_arg)
 
               {:ok, %{
-                iso_country_code: iso_country_code,
+                country_code: country_code,
                 country_calling_code: country_calling_code,
                 national_number: cleaned_national_number,
                 trimmed_national_number_input: trimmed_national_number_input
@@ -109,7 +109,7 @@ defmodule MobileNumberFormat.Compiler do
                     Regex.named_captures(~r/(?<trimmed_national_number_input>\d.*\d)/, national_number_without_prefix_arg)
 
                   {:ok, %{
-                    iso_country_code: iso_country_code,
+                    country_code: country_code,
                     country_calling_code: country_calling_code,
                     national_number: cleaned_national_number_without_prefix,
                     trimmed_national_number_input: trimmed_national_number_input
@@ -141,7 +141,7 @@ defmodule MobileNumberFormat.Compiler do
           Enum.find_value(formatting_rules_list, fn formatting_rules ->
             %{
               country_calling_code: country_calling_code,
-              iso_country_code: iso_country_code,
+              country_code: country_code,
               national_prefix: national_prefix
             } = formatting_rules
 
@@ -176,7 +176,7 @@ defmodule MobileNumberFormat.Compiler do
                     Regex.named_captures(~r/(?<trimmed_national_number_input>\d.*\d)/, national_number_arg)
 
                   {:ok, %{
-                    iso_country_code: iso_country_code,
+                    country_code: country_code,
                     country_calling_code: country_calling_code,
                     national_number: cleaned_national_number,
                     trimmed_national_number_input: trimmed_national_number_input
@@ -200,9 +200,9 @@ defmodule MobileNumberFormat.Compiler do
           String.length(national_number) in possible_lengths && Regex.match?(regex, national_number)
         end
 
-        defp fetch_by_iso_country_code(iso_country_code) do
+        defp fetch_by_country_code(country_code) do
           unquote(Macro.escape(territories))
-          |> Enum.find(&(&1.iso_country_code == iso_country_code))
+          |> Enum.find(&(&1.country_code == country_code))
           |> case do
             nil ->
               :error
@@ -229,25 +229,25 @@ defmodule MobileNumberFormat.Compiler do
           end
         end
 
-        defp fetch_by_iso_country_code_or_country_calling_code(iso_country_code_arg, country_calling_code_arg) do
+        defp fetch_by_country_code_or_country_calling_code(country_code_arg, country_calling_code_arg) do
           cond do
-            iso_country_code_arg && country_calling_code_arg ->
-              case fetch_by_iso_country_code(iso_country_code_arg) do
+            country_code_arg && country_calling_code_arg ->
+              case fetch_by_country_code(country_code_arg) do
                 :error ->
-                  :invalid_iso_country_code
+                  :invalid_country_code
 
                 {:ok, %{country_calling_code: country_calling_code}} ->
                   if clean_country_calling_code(country_calling_code_arg) != country_calling_code do
                     :invalid_country_calling_code
                   else
-                    fetch_by_iso_country_code_or_country_calling_code(iso_country_code_arg, nil)
+                    fetch_by_country_code_or_country_calling_code(country_code_arg, nil)
                   end
               end
 
-            iso_country_code_arg ->
-              case fetch_by_iso_country_code(iso_country_code_arg) do
+            country_code_arg ->
+              case fetch_by_country_code(country_code_arg) do
                 :error ->
-                  :invalid_iso_country_code
+                  :invalid_country_code
 
                 {:ok, formatting_rules} ->
                   {:ok, formatting_rules}
