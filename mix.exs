@@ -1,7 +1,7 @@
 defmodule MobileNumberFormat.MixProject do
   use Mix.Project
 
-  @version "0.3.0"
+  @version "0.4.0"
 
   def project do
     [
@@ -30,8 +30,9 @@ defmodule MobileNumberFormat.MixProject do
 
   defp deps do
     [
-      {:saxy, "~> 1.4"},
-      {:jason, "~> 1.3", only: [:dev, :test]},
+      {:ecto, "~> 3.10"},
+      {:saxy, "~> 1.5"},
+      {:jason, "~> 1.4", only: [:dev, :test]},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
